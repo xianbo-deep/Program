@@ -43,11 +43,7 @@ $$
 - 参数$K$辨识
 
 $$
-\begin{align}
-
-    \lim_{t \to \infty} Y(t) &= KU + y_0 \ \\
-    K& = \frac{Y(\infty) - y_0}{U}
-\end{align}
+\begin{align}\lim_{t \to \infty} Y(t) &= KU + y_0 \ \\ K& = \frac{Y(\infty) - y_0}{U}\end{align}
 $$
 
 - 参数$T、\theta$辨识

@@ -232,6 +232,8 @@ def simulate_and_plot(K, tau, theta, best_params,setpoint = 35,room_temp=16.8):
     plt.ylabel('误差')
     plt.legend()
     plt.grid(True)
+    plt.savefig('error.png')
+    plt.show()
 
 
     plt.figure(figsize=(12, 8))
