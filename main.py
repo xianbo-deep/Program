@@ -202,7 +202,11 @@ def simulate_and_plot(K, tau, theta, best_params,setpoint = 35,room_temp=16.8):
 
     # 跟踪超调量
     max_overshoot = 0
-
+    peak_time = 0
+    rise_time = 0
+    first_cross_10 = 0
+    first_cross_90 = 0
+    settled = False
     for i in range(1, len(time)):
         # 无延迟
         current_temp = temp[i - 1]
@@ -218,11 +222,26 @@ def simulate_and_plot(K, tau, theta, best_params,setpoint = 35,room_temp=16.8):
         # 误差
         error[i] = setpoint - temp[i]
 
-        # 更新最大超调
-        if temp[i] > 35:
-            overshoot = temp[i] - 35
+        if temp[i] >= room_temp + 0.1 * (setpoint - room_temp) and first_cross_10 == 0:
+            first_cross_10 = time[i]
+        if temp[i] >= room_temp + 0.9 * (setpoint - room_temp) and first_cross_90 == 0:
+            first_cross_90 = time[i]
+            rise_time = first_cross_90 - first_cross_10
+
+            # 计算峰值时间和超调量
+        if temp[i] > setpoint:
+            overshoot = temp[i] - setpoint
             if overshoot > max_overshoot:
                 max_overshoot = overshoot
+                peak_time = time[i]
+
+            # 计算调节时间 (进入±2%带)
+        if not settled and abs(temp[i] - setpoint) <= 0.02 * setpoint:
+            settling_time = time[i]
+            settled = True
+        elif abs(temp[i] - setpoint) > 0.02 * setpoint:
+            settled = False
+            settling_time = 0
 
     # 绘图
 
@@ -262,7 +281,10 @@ def simulate_and_plot(K, tau, theta, best_params,setpoint = 35,room_temp=16.8):
     steady_error = np.mean(np.abs(error[-50:]))  # 后50点作为稳态误差
 
     print("\n控制性能:")
-    print(f"最大超调: {max_overshoot:.2f}℃")
+    print(f"上升时间 (10%-90%): {rise_time:.2f}秒")
+    print(f"峰值时间: {peak_time:.2f}秒")
+    print(f"调节时间 (±2%): {settling_time:.2f}秒")
+    print(f"最大超调: {max_overshoot:.2f}℃ ({(max_overshoot / setpoint * 100):.2f}%)")
     print(f"稳态误差: {steady_error:.3f}℃")
     print(f"ITAE指标: {itae:.1f}")
 
